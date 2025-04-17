@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -9,8 +11,38 @@ export default function Login() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Login submitted", { username, password });
+        login();
+        console.log("Form submitted");
     };
+
+    const login = async () => {
+        if (!username || !password) {
+            toast.error("All fields are required");
+            return;
+        }
+
+        try {
+            const response = await axios.post("/api/auth", {
+                username,
+                password,
+            });
+            console.log("Sending request to login user");
+
+            if (response.status === 200) {
+                toast.success("Login successful");
+            } else {
+                toast.error("Login failed", response.data);
+            }
+        } catch (error) {
+            console.error("Error logging in:", error);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data.message || "Something went wrong. Please try again later.");
+            } else {
+                toast.error("Something went wrong. Please try again later.");
+            }
+        }
+    };
+
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 px-4">
